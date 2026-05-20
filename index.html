@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>小叶子陪聊交易站</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: 24px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        .title {
+            font-size: 28px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 24px;
+            font-size: 14px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #333;
+        }
+
+        .duration-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .duration-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 16px;
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .duration-card.selected {
+            border-color: #667eea;
+            background: #f0f0ff;
+        }
+
+        .duration-time {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .duration-payment {
+            font-size: 12px;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            font-size: 16px;
+            outline: none;
+            transition: border 0.3s;
+        }
+
+        .form-group input:focus {
+            border-color: #667eea;
+        }
+
+        .upload-area {
+            border: 2px dashed #ddd;
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 24px;
+        }
+
+        .upload-area:hover {
+            border-color: #667eea;
+            background: #fafaff;
+        }
+
+        .upload-area.has-image {
+            padding: 0;
+            border: none;
+        }
+
+        .preview-img {
+            width: 100%;
+            border-radius: 16px;
+            max-height: 300px;
+            object-fit: cover;
+        }
+
+        .upload-icon {
+            font-size: 48px;
+        }
+
+        .upload-text {
+            display: block;
+            color: #888;
+            margin-top: 8px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 40px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn-submit:active {
+            transform: scale(0.98);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 12px;
+            margin-top: 16px;
+            text-align: center;
+            display: none;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            display: block;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            display: block;
+        }
+
+        .admin-panel {
+            margin-top: 20px;
+        }
+
+        .order-item {
+            border-bottom: 1px solid #eee;
+            padding: 16px;
+        }
+
+        .order-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        .status-waiting {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-approved {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .admin-img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-top: 8px;
+            cursor: pointer;
+        }
+
+        .btn-approve {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-right: 8px;
+        }
+
+        .btn-reject {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        .tab-bar {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 12px;
+        }
+
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 8px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 用户界面 -->
+        <div id="userView">
+            <div class="card">
+                <div class="title">🍃 小叶子陪聊交易站</div>
+                <div class="subtitle">用照片交换聊天时间</div>
+
+                <div class="section-title">⌛ 选择时长</div>
+                <div class="duration-grid" id="durationGrid">
+                    <div class="duration-card" data-duration="10分钟" data-payment="朋友圈主页截图">
+                        <div class="duration-time">10分钟</div>
+                        <div class="duration-payment">→ 朋友圈主页截图</div>
+                    </div>
+                    <div class="duration-card" data-duration="30分钟" data-payment="蓝仁特效照片">
+                        <div class="duration-time">30分钟</div>
+                        <div class="duration-payment">→ 蓝仁特效照片</div>
+                    </div>
+                    <div class="duration-card" data-duration="1个小时" data-payment="手的照片">
+                        <div class="duration-time">1个小时</div>
+                        <div class="duration-payment">→ 手的照片</div>
+                    </div>
+                    <div class="duration-card" data-duration="1.5个小时" data-payment="自拍照">
+                        <div class="duration-time">1.5个小时</div>
+                        <div class="duration-payment">→ 自拍照</div>
+                    </div>
+                    <div class="duration-card" data-duration="2个小时" data-payment="一张全身照">
+                        <div class="duration-time">2个小时</div>
+                        <div class="duration-payment">→ 一张全身照</div>
+                    </div>
+                </div>
+
+                <div class="section-title">📝 你的信息</div>
+                <div class="form-group">
+                    <label>姓名 *</label>
+                    <input type="text" id="name" placeholder="怎么称呼你">
+                </div>
+                <div class="form-group">
+                    <label>性别</label>
+                    <select id="gender">
+                        <option value="">保密</option>
+                        <option value="女">女</option>
+                        <option value="男">男</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>年龄</label>
+                    <input type="number" id="age" placeholder="例如：25">
+                </div>
+                <div class="form-group">
+                    <label>所处区域</label>
+                    <input type="text" id="region" placeholder="例如：北京朝阳">
+                </div>
+
+                <div class="section-title">📸 上传凭证</div>
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📷</div>
+                    <div class="upload-text" id="uploadText">点击拍照或上传照片</div>
+                </div>
+                <input type="file" id="fileInput" accept="image/*" style="display: none">
+
+                <div id="message"></div>
+                <button class="btn-submit" id="submitBtn" disabled>请先选择时长</button>
+            </div>
+        </div>
+
+        <!-- 管理后台（只有知道路径的人能看到） -->
+        <div id="adminView" class="hidden">
+            <div class="card">
+                <div class="title">🔧 管理后台</div>
+                <div class="subtitle">共 <span id="orderCount">0</span> 条记录</div>
+                <div id="adminContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 存储数据
+        let orders = JSON.parse(localStorage.getItem('xiaoyezi_orders') || '[]');
+        let selectedDuration = null;
+        let selectedPayment = '';
+        let currentImageData = null;
+        let currentTab = 'waiting';
+
+        // 判断是否在管理后台（URL包含 ?admin）
+        const isAdmin = window.location.hash === '#admin' || window.location.search.includes('admin');
+
+        // 渲染页面
+        function render() {
+            if (isAdmin) {
+                document.getElementById('userView').classList.add('hidden');
+                document.getElementById('adminView').classList.remove('hidden');
+                renderAdminPanel();
+            } else {
+                document.getElementById('userView').classList.remove('hidden');
+                document.getElementById('adminView').classList.add('hidden');
+            }
+        }
+
+        // 渲染管理后台
+        function renderAdminPanel() {
+            const filteredOrders = currentTab === 'all' 
+                ? orders 
+                : orders.filter(o => o.status === currentTab);
+            
+            document.getElementById('orderCount').innerText = filteredOrders.length;
+            
+            if (filteredOrders.length === 0) {
+                document.getElementById('adminContent').innerHTML = '<div style="text-align:center;padding:40px;color:#888;">暂无订单</div>';
+                return;
+            }
+            
+            let html = '<div class="tab-bar">';
+            html += `<div class="tab ${currentTab === 'waiting' ? 'active' : ''}" onclick="setTab('waiting')">待审核</div>`;
+            html += `<div class="tab ${currentTab === 'approved' ? 'active' : ''}" onclick="setTab('approved')">已通过</div>`;
+            html += `<div class="tab ${currentTab === 'all' ? 'active' : ''}" onclick="setTab('all')">全部</div>`;
+            html += '</div>';
+            
+            filteredOrders.forEach(order => {
+                html += `
+                    <div class="order-item">
+                        <div><strong>${order.name || '未填'}</strong> | ${order.gender || '?'} | ${order.age || '?'}岁 | ${order.region || '未知'}</div>
+                        <div style="font-size:14px;color:#666;margin:4px 0;">时长：${order.duration} | 凭证：${order.paymentType}</div>
+                        <div style="margin:4px 0;">提交时间：${order.createTimeStr || order.createTime}</div>
+                        <div>状态：<span class="order-status status-${order.status}">${order.status === 'waiting' ? '待审核' : '已通过'}</span></div>
+                `;
+                
+                if (order.photoUrl) {
+                    html += `<img class="admin-img" src="${order.photoUrl}" onclick="window.open('${order.photoUrl}')" />`;
+                }
+                
+                if (order.status === 'waiting') {
+                    html += `
+                        <div style="margin-top:12px;">
+                            <button class="btn-approve" onclick="approveOrder('${order.id}')">✅ 通过</button>
+                            <button class="btn-reject" onclick="rejectOrder('${order.id}')">❌ 拒绝</button>
+                        </div>
+                    `;
+                }
+                
+                html += '</div>';
+            });
+            
+            document.getElementById('adminContent').innerHTML = html;
+        }
+
+        function setTab(tab) {
+            currentTab = tab;
+            renderAdminPanel();
+        }
+
+        function approveOrder(id) {
+            orders = orders.map(o => o.id === id ? {...o, status: 'approved'} : o);
+            localStorage.setItem('xiaoyezi_orders', JSON.stringify(orders));
+            renderAdminPanel();
+        }
+
+        function rejectOrder(id) {
+            orders = orders.map(o => o.id === id ? {...o, status: 'rejected'} : o);
+            localStorage.setItem('xiaoyezi_orders', JSON.stringify(orders));
+            renderAdminPanel();
+        }
+
+        // 时长选择
+        document.querySelectorAll('.duration-card').forEach(card => {
+            card.addEventListener('click', () => {
+                document.querySelectorAll('.duration-card').forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+                selectedDuration = card.dataset.duration;
+                selectedPayment = card.dataset.payment;
+                document.getElementById('submitBtn').disabled = false;
+                document.getElementById('submitBtn').innerText = '提交交换';
+            });
+        });
+
+        // 照片上传
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        
+        uploadArea.addEventListener('click', () => fileInput.click());
+        
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                currentImageData = event.target.result;
+                uploadArea.innerHTML = `<img class="preview-img" src="${currentImageData}" />`;
+                uploadArea.classList.add('has-image');
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // 提交
+        document.getElementById('submitBtn').addEventListener('click', () => {
+            if (!selectedDuration) {
+                showMessage('请先选择时长', 'error');
+                return;
+            }
+            if (!document.getElementById('name').value.trim()) {
+                showMessage('请填写姓名', 'error');
+                return;
+            }
+            if (!currentImageData) {
+                showMessage('请上传照片', 'error');
+                return;
+            }
+            
+            const newOrder = {
+                id: Date.now().toString(),
+                name: document.getElementById('name').value.trim(),
+                gender: document.getElementById('gender').value,
+                age: document.getElementById('age').value,
+                region: document.getElementById('region').value,
+                duration: selectedDuration,
+                paymentType: selectedPayment,
+                photoUrl: currentImageData,
+                status: 'waiting',
+                createTime: new Date().toLocaleString(),
+                createTimeStr: new Date().toLocaleString()
+            };
+            
+            orders.unshift(newOrder);
+            localStorage.setItem('xiaoyezi_orders', JSON.stringify(orders));
+            
+            showMessage('提交成功！小叶子会尽快审核~', 'success');
+            
+            // 重置表单
+            selectedDuration = null;
+            selectedPayment = '';
+            currentImageData = null;
+            document.querySelectorAll('.duration-card').forEach(c => c.classList.remove('selected'));
+            document.getElementById('name').value = '';
+            document.getElementById('gender').value = '';
+            document.getElementById('age').value = '';
+            document.getElementById('region').value = '';
+            uploadArea.innerHTML = '<div class="upload-icon">📷</div><div class="upload-text">点击拍照或上传照片</div>';
+            uploadArea.classList.remove('has-image');
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('submitBtn').innerText = '请先选择时长';
+            
+            setTimeout(() => hideMessage(), 3000);
+        });
+
+        function showMessage(msg, type) {
+            const msgDiv = document.getElementById('message');
+            msgDiv.textContent = msg;
+            msgDiv.className = `message ${type}`;
+        }
+        
+        function hideMessage() {
+            const msgDiv = document.getElementById('message');
+            msgDiv.className = 'message';
+        }
+
+        // 初始化
+        render();
+    </script>
+</body>
+</html>
